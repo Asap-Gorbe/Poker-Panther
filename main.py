@@ -1,34 +1,44 @@
 import random
 
+from Bastion import account
+
 
 class Deck:
     def __init__(self):
-        self.suits = ['Hearts♥️', 'Diamonds♦️', 'Clubs♣️', 'Spades♠️']
-        self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-        self.cards = [(rank, suit) for suit in self.suits for rank in self.ranks]
-        random.shuffle(self.cards)
+        self.Deck = []
+
+        suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+        ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+        for rank in ranks:
+            for suit in suits:
+                self.Deck.append(f"{rank}-{suit}")
 
     def deal(self):
-        return self.cards.pop()
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def reset_deck(self):
-        self.cards = [(rank, suit) for suit in self.suits for rank in self.ranks]
-        random.shuffle(self.cards)
-
-    def __len__(self):
-        return len(self.cards)
-
-    def __repr__(self):
-
-        return f"Deck of {len(self.cards)} cards"
+        random.shuffle(self.Deck)
+        card_1_2 = self.Deck[-2:]
+        del self.Deck[-2:]
+        return card_1_2
 
 
-# Example usage:
-deck = Deck()
-print(deck)
-card = deck.deal()
-print(f"Dealt: {card}")
-print(deck)
+class Player:
+    def __init__(self, username,Deck,Chip=1000):
+        self.username = username
+        self.Deck = Deck
+        self.Chip = Chip
+    def action (self):
+        action = False
+    def bet (self,amount):
+        action = True
+        self.Chip -= amount
+        if amount > self.Chip :
+            print('you cant bet more than your balance ')
+
+
+
+
+
+
+cards = Deck()
+p1 = Player('A$AP Gorbe',Deck.deal())
+p2 = Player("shayanstx", Deck.deal())
