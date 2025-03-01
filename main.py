@@ -1,44 +1,71 @@
 import random
 
-from Bastion import account
-
-
-class Deck:
-    def __init__(self):
-        self.Deck = []
-
-        suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-        ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-
-        for rank in ranks:
-            for suit in suits:
-                self.Deck.append(f"{rank}-{suit}")
-
-    def deal(self):
-        random.shuffle(self.Deck)
-        card_1_2 = self.Deck[-2:]
-        del self.Deck[-2:]
-        return card_1_2
+cards = []
+suits = ["Heart", "Diamond", "Club", "Spade"]
+ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+for suit in suits:
+    for rank in ranks:
+        cards.append(f"{rank}-{suit}")
 
 
 class Player:
-    def __init__(self, username,Deck,Chip=1000):
+    def __init__(self, username,chip = 1000):
         self.username = username
-        self.Deck = Deck
-        self.Chip = Chip
-    def action (self):
-        action = False
+        self.chip = chip
+        self.isFold = False
+        self.cards = []
     def bet (self,amount):
-        action = True
-        self.Chip -= amount
-        if amount > self.Chip :
-            print('you cant bet more than your balance ')
+        self.chip -= amount
+    def check(self):
+        pass
+
+    def fold(self):
+        self.isFold = True
 
 
+class PokerGame:
+    def __init__(self):
+        self.players = []
+        self.board = []
+        self.min_bet = 10
+
+    def Flop(self):
+        self.deal()
+        del cards[-1]
+        self.board.extend(cards[-3:])
+        del cards[-3:]
+
+    def Turn(self):
+        del cards[-1]
+        self.board.append(cards[-1])
+        del cards[-1]
+
+    def River (self):
+        del cards[-1]
+        self.board.append(cards[-1])
+        del cards[-1]
+
+    def deal(self):
+        random.shuffle(cards)
+        for player in self.players:
+            player.cards = cards[-2:]
+            del cards[-2:]
+
+    def add_player(self, player):
+        self.players.append(player)
 
 
+# --- Main App ---
 
-
-cards = Deck()
-p1 = Player('A$AP Gorbe',Deck.deal())
-p2 = Player("shayanstx", Deck.deal())
+if __name__ == "__main__":
+    game = PokerGame()
+    game.add_player(Player("shayan"))
+    game.add_player(Player("Gorbe"))
+    game.add_player(Player("awful master"))
+    game.Flop()
+    game.Turn()
+    game.River()
+    for player in game.players:
+        print(f"{player.username} cards:", player.cards)
+        merge_cards = player.cards + game.board
+        print(f"{player.username} combined:", merge_cards)
