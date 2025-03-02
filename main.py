@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 cards = []
 suits = ["Heart", "Diamond", "Club", "Spade"]
@@ -21,7 +22,6 @@ class Player:
 
     def fold(self):
         self.isFold = True
-
 
 class PokerGame:
     def __init__(self):
@@ -66,6 +66,27 @@ if __name__ == "__main__":
     game.Turn()
     game.River()
     for player in game.players:
-        print(f"{player.username} cards:", player.cards)
+        print(f"{player.username} cards:", player.cards,'\n')
         merge_cards = player.cards + game.board
-        print(f"{player.username} combined:", merge_cards)
+        print(f"{player.username} combined: ", merge_cards ,'\n' )
+        ranks_only = [card.split('-')[0] for card in merge_cards]
+        houses_only = [card.split('-')[1] for card in merge_cards]
+        rank_counts = Counter(ranks_only)
+        house_counts = Counter(houses_only)
+
+        most_common_rank, count_rank = rank_counts.most_common(1)[0]
+        most_common_house, count_house = house_counts.most_common(1)[0]
+
+        #print(f"Most repeated rank: {most_common_rank} (appears {count_rank} times)")
+        #print(f"Most repeated house: {most_common_house} (appears {count_house} times)")
+
+        # Check for hand rankings
+        if count_house >= 5:
+            print(f'{player.username} has a flush of {most_common_house}','\n')
+
+        if count_rank == 2:
+            print(f'{player.username} has a pair of {most_common_rank}','\n')
+        elif count_rank == 3:
+            print(f'{player.username} has a Three of a kind of {most_common_rank}','\n')
+        elif count_rank == 4:
+            print(f'{player.username} has a for of a kind {most_common_rank}','\n')
