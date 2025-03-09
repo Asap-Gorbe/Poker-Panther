@@ -78,26 +78,41 @@ def is_straight(rank_values):
         else:
             count = 1
     return False
-def is_straight(rank_values):
-    count = 1
-    for i in range(len(rank_values) - 1):
-        if rank_values[i] + 1 == rank_values[i + 1]:
-            count += 1
-            if count == 5:
-                return True
-        else:
-            count = 1
-    return False
+
 def is_ace_low_straight(rank_values):
-    if set([14, 2, 3, 4, 5]).issubset(rank_values):
-        return True
-    return False
+    return set([14, 2, 3, 4, 5]).issubset(rank_values)
 
 def has_straight(cards):
     rank_values = get_sorted_ranks(cards)
     return is_straight(rank_values) or is_ace_low_straight(rank_values)
-# --- Main App ---
 
+def has_flush(cards):
+    suits = [card.split('-')[1] for card in cards]
+    suit_counts = Counter(suits)
+    return any(count >= 5 for count in suit_counts.values())
+
+def has_straight_flush(cards):
+    suits = [card.split('-')[1] for card in cards]
+    suit_counts = Counter(suits)
+    for suit, count in suit_counts.items():
+        if count >= 5:
+            suited_cards = [card for card in cards if card.endswith(suit)]
+            if has_straight(suited_cards):
+                return True
+    return False
+
+def has_royal_flush(cards):
+    suits = [card.split('-')[1] for card in cards]
+    suit_counts = Counter(suits)
+    for suit, count in suit_counts.items():
+        if count >= 5:
+            suited_cards = [card for card in cards if card.endswith(suit)]
+            rank_values = get_sorted_ranks(suited_cards)
+            if set([10, 11, 12, 13, 14]).issubset(rank_values):
+                return True
+    return False
+
+# --- Main App ---
 if __name__ == "__main__":
     game = PokerGame()
     game.add_player(Player("shayan"))
@@ -117,24 +132,28 @@ if __name__ == "__main__":
 
         most_common_rank, count_rank = rank_counts.most_common(1)[0]
         most_common_house, count_house = house_counts.most_common(1)[0]
-
-        #print(f"Most repeated rank: {most_common_rank} (appears {count_rank} times)")
-        #print(f"Most repeated house: {most_common_house} (appears {count_house} times)")
-
-        # Check for hand rankings
-
         if count_rank == 2:
-            print(f'{player.username} has a pair of {most_common_rank}','\n')
-            player.point = 2
+            if len([r for r in rank_counts.values() if r == 2]) == 2:
+                print(f'{player.username} has Two Pair', '\n')
+                player.point = 3
+            else:
+                print(f'{player.username} has a Pair of {most_common_rank}', '\n')
+                player.point = 2
         elif count_rank == 3:
-            print(f'{player.username} has a Three of a kind of {most_common_rank}','\n')
-            player.point = 3
-        elif count_house >= 5:
-            print(f'{player.username} has a flush of {most_common_house}','\n')
-            player.point = 5
-        elif has_straight(merge_cards):
-            print(f'{player.username} has a straight \n')
+            print(f'{player.username} has Three of a Kind of {most_common_rank}', '\n')
             player.point = 4
         elif count_rank == 4:
-            print(f'{player.username} has a for of a kind {most_common_rank}', '\n')
+            print(f'{player.username} has Four of a Kind of {most_common_rank}', '\n')
             player.point = 8
+        elif has_flush(merge_cards):
+            print(f'{player.username} has a Flush of {most_common_house}', '\n')
+            player.point = 6
+        elif has_straight(merge_cards):
+            print(f'{player.username} has a Straight', '\n')
+            player.point = 5
+        elif has_straight_flush(merge_cards):
+            print(f'{player.username} has a Straight Flush!', '\n')
+            player.point = 9
+        elif has_royal_flush(merge_cards):
+            print(f'{player.username} has a Royal Flush!!!', '\n')
+            player.point = 10
