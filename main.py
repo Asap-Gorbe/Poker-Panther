@@ -112,6 +112,51 @@ def has_royal_flush(cards):
                 return True
     return False
 
+def has_full_house(cards):
+    rank_counts = Counter(card.split('-')[0] for card in cards)
+    has_three = any(count == 3 for count in rank_counts.values())
+    has_pair = any(count == 2 for count in rank_counts.values())
+    return has_three and has_pair
+
+
+def has_pairs(cards):
+    ranks_only = [card.split('-')[0] for card in cards]
+    rank_counts = Counter(ranks_only)
+
+    pairs = [rank for rank, count in rank_counts.items() if count == 2]
+    three_of_a_kind = [rank for rank, count in rank_counts.items() if count == 3]
+    four_of_a_kind = [rank for rank, count in rank_counts.items() if count == 4]
+
+    if four_of_a_kind:
+        return ("Four of a Kind", max(four_of_a_kind, key=rank_to_value), 8)
+    elif three_of_a_kind:
+        return ("Three of a Kind", max(three_of_a_kind, key=rank_to_value), 4)
+    elif len(pairs) == 2:
+        return ("Two Pair", pairs, 3)
+    elif len(pairs) == 1:
+        return ("Pair", pairs[0], 2)
+    return (None, None, 0)  # No pair
+
+def compare_players(players):
+    players.sort(key=lambda p: p.point, reverse=True)
+    highest_score = players[0].point
+    winners = [players[0]]
+
+    for player in players[1:]:
+        if player.point == highest_score:
+            winners.append(player)
+        else:
+            break
+
+    if len(winners) > 1:
+        print("It's a tie between:")
+        for winner in winners:
+            print(f"{winner.username} with {winner.point} points")
+        return winners
+
+    print(f"The winner is {winners[0].username} with {winners[0].point} points!")
+    return winners[0]
+
 # --- Main App ---
 if __name__ == "__main__":
     game = PokerGame()
@@ -121,39 +166,26 @@ if __name__ == "__main__":
     game.Flop()
     game.Turn()
     game.River()
-    for player in game.players:
-        print(f"{player.username} cards:", player.cards,'\n')
-        merge_cards = player.cards + game.board
-        print(f"{player.username} combined: ", merge_cards ,'\n' )
-        ranks_only = [card.split('-')[0] for card in merge_cards]
-        houses_only = [card.split('-')[1] for card in merge_cards]
-        rank_counts = Counter(ranks_only)
-        house_counts = Counter(houses_only)
+for player in game.players:
+    print(f"{player.username} cards:", player.cards, '\n')
+    merge_cards = player.cards + game.board
+    print(f"{player.username} combined: ", merge_cards, '\n')
 
-        most_common_rank, count_rank = rank_counts.most_common(1)[0]
-        most_common_house, count_house = house_counts.most_common(1)[0]
-        if count_rank == 2:
-            if len([r for r in rank_counts.values() if r == 2]) == 2:
-                print(f'{player.username} has Two Pair', '\n')
-                player.point = 3
-            else:
-                print(f'{player.username} has a Pair of {most_common_rank}', '\n')
-                player.point = 2
-        elif count_rank == 3:
-            print(f'{player.username} has Three of a Kind of {most_common_rank}', '\n')
-            player.point = 4
-        elif count_rank == 4:
-            print(f'{player.username} has Four of a Kind of {most_common_rank}', '\n')
-            player.point = 8
-        elif has_flush(merge_cards):
-            print(f'{player.username} has a Flush of {most_common_house}', '\n')
-            player.point = 6
-        elif has_straight(merge_cards):
-            print(f'{player.username} has a Straight', '\n')
-            player.point = 5
-        elif has_straight_flush(merge_cards):
-            print(f'{player.username} has a Straight Flush!', '\n')
-            player.point = 9
-        elif has_royal_flush(merge_cards):
-            print(f'{player.username} has a Royal Flush!!!', '\n')
-            player.point = 10
+    hand, rank, points = has_pairs(merge_cards)
+    if hand:
+        print(f"{player.username} has {hand} ({rank})", '\n')
+        player.point = points
+    elif has_flush(merge_cards):
+        print(f'{player.username} has a Flush', '\n')
+        player.point = 6
+    elif has_straight(merge_cards):
+        print(f'{player.username} has a Straight', '\n')
+        player.point = 5
+    elif has_straight_flush(merge_cards):
+        print(f'{player.username} has a Straight Flush!', '\n')
+        player.point = 9
+    elif has_royal_flush(merge_cards):
+        print(f'{player.username} has a Royal Flush!!!', '\n')
+        player.point = 10
+
+winner = compare_players(game.players)
